@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Initialize default answer as empty
+answer=""
+
+# Check for the '-y' option
+if [ "$1" = "-y" ]; then
+    answer="y"
+    shift  # Shift the arguments to the left
+fi
+
+# Check if exactly one argument is passed
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 [-y] <directory>"
+    exit 1
+fi
+
+# Check if the argument is a valid directory
+if [ ! -d "$1" ]; then
+    echo "Error: '$1' is not a valid directory."
+    exit 1
+fi
+
+writable_files=$(find "$1" -type f -perm -o=w)
+writable_dirs=$(find "$1" -type d -perm -o=w)
+
+# Check if the list is empty
+if [ -z "$writable_files" ] && [ -z "$writable_dirs" ]; then
+    echo "No world-writable files or directories found."
+    exit 0
+else
+    echo "The following files/directories are world-writable:"
+    echo "$writable_files"
+    echo "$writable_dirs"
+
+    if [ -z "$answer" ]; then
+        # Ask the user if they want to fix the permissions
+        echo "Do you want the permissions to be fixed (y/n)?"
+        read answer
+    fi
+
+    if [ "$answer" = "y" ]; then
+        # If the user agrees, remove world-writable permissions from files
+        for file in $writable_files; do
+            chmod o-w "$file"
+        done
+        # Remove world-writable permissions from directories
+        for dir in $writable_dirs; do
+            chmod o-w "$dir"
+        done
+        echo "Permissions have been fixed."
+    else
+        echo "No changes made."
+    fi
+fi

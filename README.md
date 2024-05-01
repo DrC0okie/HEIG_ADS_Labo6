@@ -144,16 +144,155 @@ Date: 2024-04-29
 > test_dir/dir2
 > ```
 
+##### Setting up the directories, files and permissions
 
+````bash
+mkdir test_dir && cd test_dir
+touch file1.txt file2.txt file3.txt
+mkdir dir1 dir2
+chmod o+w file1.txt dir1
+
+````
+
+
+
+##### using find to list all world writable files and directories
+
+Files:
+
+```bash
+find . -type f -perm -o=w -print
+```
+
+output:
+```
+./file1.txt
+```
+
+Directories:
+
+```bash
+find . -type d -perm -o=w -print
+```
+
+output:
+
+```
+./dir1
+```
+
+
+
+##### Script:
+
+```bash
+#!/bin/bash
+
+echo "The following files/directories are world-writable:"
+
+# Find and display world-writable files
+find ./test_dir -type f -perm -o=w -print
+
+# Find and display world-writable directories
+find ./test_dir -type d -perm -o=w -print
+```
+
+
+
+output:
+
+```
+The following files/directories are world-writable:
+./test_dir/file1.txt
+./test_dir/dir1
+```
 
 
 
 ## Task 3: Pass the directory as an argument
 
-> The user should be able to specify which directory the tool should analyse. Modify the script such that it takes one argument, the directory. The script should behave as follows:
+> The user should be able to specify which directory the tool should analyze. Modify the script such that it takes one argument, the directory. The script should behave as follows:
 >
 > * If it is called without argument it should display a corresponding error message and exit with a return code 1.
 > * If the given argument is not a valid directory it should display a corresponding error message and exit with a return code 1.
+
+
+
+##### Script:
+
+```bash
+#!/bin/bash
+
+# Check if exactly one argument is passed
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <directory>"
+    exit 1
+fi
+
+# Check if the argument is a valid directory
+if [ ! -d "$1" ]; then
+    echo "Error: '$1' is not a valid directory."
+    exit 1
+fi
+
+writable_files=$(find "$1" -type f -perm -o=w)
+writable_dirs=$(find "$1" -type d -perm -o=w)
+
+# Check if the list is empty
+if [ -z "$writable_files" ] && [ -z "$writable_dirs" ]; then
+    echo "No world-writable files or directories found."
+    exit 0
+else
+    echo "The following files/directories are world-writable:"
+    echo "$writable_files"
+    echo "$writable_dirs"
+fi
+```
+
+
+
+##### Tests
+
+Testing with no arguments:
+
+```bash
+./fix_permissions
+```
+
+output:
+```
+Usage: ./fix_permissions <directory>
+```
+
+
+
+Testing with invalid directory:
+
+```bash
+./fix_permissions non_existent_directory
+```
+
+output:
+
+```
+Error: 'non_existent_directory' is not a valid directory.
+```
+
+
+
+Testing with `test_dir`
+
+```bash
+# Valid directory
+./fix_permissions /path/to/your/test_dir
+```
+
+output:
+```
+The following files/directories are world-writable:
+test_dir/file1.txt
+test_dir/dir1
+```
 
 
 
@@ -176,6 +315,195 @@ Date: 2024-04-29
 > Tip: To avoid having to re-create the initial state of the test directory every time you run the script do the following: Run the script on a copy of the test directory that you throw away after use.
 
 
+
+##### Script:
+
+```bash
+#!/bin/bash
+
+# Check if exactly one argument is passed
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <directory>"
+    exit 1
+fi
+
+# Check if the argument is a valid directory
+if [ ! -d "$1" ]; then
+    echo "Error: '$1' is not a valid directory."
+    exit 1
+fi
+
+writable_files=$(find "$1" -type f -perm -o=w)
+writable_dirs=$(find "$1" -type d -perm -o=w)
+
+# Check if the list is empty
+if [ -z "$writable_files" ] && [ -z "$writable_dirs" ]; then
+    echo "No world-writable files or directories found."
+    exit 0
+else
+    echo "The following files/directories are world-writable:"
+    echo "$writable_files"
+    echo "$writable_dirs"
+
+    # Ask the user if they want to fix the permissions
+    echo "Do you want the permissions to be fixed (y/n)?"
+    read answer
+
+    if [ "$answer" = "y" ]; then
+        # If the user agrees, remove world-writable permissions from files
+        for file in $writable_files; do
+            chmod o-w "$file"
+        done
+        # Remove world-writable permissions from directories
+        for dir in $writable_dirs; do
+            chmod o-w "$dir"
+        done
+        echo "Permissions have been fixed."
+    else
+        echo "No changes made."
+    fi
+fi
+```
+
+
+
+##### Tests:
+
+```bash
+# Copy the test dir
+cp -r test_dir test_dir_backup
+
+# Sep world writable permissions to file1, dir1 and display permissions
+cd test_dir_backup && chmod o+w file1.txt dir1 && ls -l && cd ..
+```
+
+output:
+
+```
+total 8
+drwxrwxrwx 2 tim tim 4096 Mai  1 10:59 dir1
+drwxrwxr-x 2 tim tim 4096 Mai  1 10:59 dir2
+-rw-rw-rw- 1 tim tim    0 Mai  1 10:59 file1.txt
+-rw-rw-r-- 1 tim tim    0 Mai  1 10:59 file2.txt
+-rw-rw-r-- 1 tim tim    0 Mai  1 10:59 file3.txt
+```
+
+Launching the script:
+
+```bash
+./fix_permissions test_dir_backup/
+```
+
+Output:
+```
+The following files/directories are world-writable:
+test_dir_backup/file1.txt
+test_dir_backup/dir1
+Do you want the permissions to be fixed (y/n)?
+```
+
+Output by selecting `y`:
+
+```
+Permissions have been fixed.
+```
+
+Check the new permissions:
+```bash
+cd test_dir_backup && ls -l && cd ..
+```
+
+Output:
+
+```
+total 8
+drwxrwxr-x 2 tim tim 4096 Mai  1 10:59 dir1
+drwxrwxr-x 2 tim tim 4096 Mai  1 10:59 dir2
+-rw-rw-r-- 1 tim tim    0 Mai  1 10:59 file1.txt
+-rw-rw-r-- 1 tim tim    0 Mai  1 10:59 file2.txt
+-rw-rw-r-- 1 tim tim    0 Mai  1 10:59 file3.txt
+```
+
+
+
+We can see that `dir1` and `file1` have their permission fixed.
+
+
+
+#### *Bonus:* option to automatically fix permissions
+
+```bash
+#!/bin/bash
+
+# Initialize default answer as empty
+answer=""
+
+# Check for the '-y' option
+if [ "$1" = "-y" ]; then
+    answer="y"
+    shift  # Shift the arguments to the left
+fi
+
+# Check if exactly one argument is passed
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 [-y] <directory>"
+    exit 1
+fi
+
+# Check if the argument is a valid directory
+if [ ! -d "$1" ]; then
+    echo "Error: '$1' is not a valid directory."
+    exit 1
+fi
+
+writable_files=$(find "$1" -type f -perm -o=w)
+writable_dirs=$(find "$1" -type d -perm -o=w)
+
+# Check if the list is empty
+if [ -z "$writable_files" ] && [ -z "$writable_dirs" ]; then
+    echo "No world-writable files or directories found."
+    exit 0
+else
+    echo "The following files/directories are world-writable:"
+    echo "$writable_files"
+    echo "$writable_dirs"
+
+    if [ -z "$answer" ]; then
+        # Ask the user if they want to fix the permissions
+        echo "Do you want the permissions to be fixed (y/n)?"
+        read answer
+    fi
+
+    if [ "$answer" = "y" ]; then
+        # If the user agrees, remove world-writable permissions from files
+        for file in $writable_files; do
+            chmod o-w "$file"
+        done
+        # Remove world-writable permissions from directories
+        for dir in $writable_dirs; do
+            chmod o-w "$dir"
+        done
+        echo "Permissions have been fixed."
+    else
+        echo "No changes made."
+    fi
+fi
+```
+
+testing the script:
+
+```bash
+./fix_permissions -y test_dir
+```
+
+output:
+
+```
+The following files/directories are world-writable:
+test_dir/file1.txt
+test_dir/dir1
+Permissions have been fixed.
+```
 
 
 
