@@ -34,40 +34,109 @@ Questions :
 >   * `~/.bashrc`
 >   * `~/.bash_history`
 
-* `/etc/passwd`
+**Input and Output :**
+
+`/etc/passwd` 
 
 ```bash
-❯ ls -l /etc/passwd
+ls -l /etc/passwd
 -rw-r--r-- 1 root root 2727 Feb 23 19:06 /etc/passwd
 ```
 
-* `/bin/ls`
+- **`-l`**: Displays detailed information in a long listing format.
+
+`/bin/ls` 
 
 ```bash
-❯ ls -l /bin/ls
+ls -l /bin/ls
 -rwxr-xr-x 1 root root 138216 Feb  8 04:46 /bin/ls
 ```
 
-```
-❯ ls -l ~/.bashrc
+`~/.bashrc`
+
+```bash
+ls -l ~/.bashrc
 -rw-r--r-- 1 anthony anthony 3792 Okt 20  2023 /home/anthony/.bashrc
 ```
 
-```
-❯ ls -l ~/.bash_history
+`~/.bash_history
+
+```bash
+ls -l ~/.bash_history
 -rw------- 1 anthony anthony 14225 Dez  8 17:28 /home/anthony/.bash_history
 ```
 
+**File ownership and permission details :**
 
+| File              | Owner   | Group   | Can Read     | Can Write    | Can Execute |
+| ----------------- | ------- | ------- | ------------ | ------------ | ----------- |
+| `/etc/passwd`     | root    | root    | Everyone     | Only root    | No one      |
+| `/bin/ls`         | root    | root    | Everyone     | Only root    | Everyone    |
+| `~/.bashrc`       | anthony | anthony | Everyone     | Only anthony | No one      |
+| `~/.bash_history` | anthony | anthony | Only anthony | Only anthony | No one      |
 
 > 2. Examine the permissions of your home directory (what option do you have to pass to `ls` to examine the permissions of directories?).
+>
 >   - Who is the owner and which is the owning group?
 >   - What is the configuration of permissions?
 >     - Who can list files?
 >     - Who can create files?
+
+**Input and output :**
+
+```bash
+ls -ld ~
+drwxr-x--- 17 anthony anthony 4096 mai    6 17:19 /home/anthony
+```
+
+- **`-l`**: Displays detailed information in a long listing format.
+- **`-d`**: Lists information about the directory itself, not its contents.
+- `rwx` for the owner means read, write, and execute permissions.
+- `r-x` for the group means read and execute permissions.
+- `---` for others means no permissions.
+
+**Permissions breakdown :**
+
+- **Owner**: `anthony`
+- **Group**: `anthony`
+
+**Configuration of Permissions:**
+
+- **Owner (anthony)**:
+  - Can read, write, and execute (navigate into the directory).
+- **Group (anthony)**:
+  - Can read and execute, but cannot write.
+- **Others**:
+  - Cannot read, write, or execute.
+
+**Who can list files :**
+
+- **Owner**: `anthoony` has full permissions to read, which includes listing files.
+- **Group**: Members of the group `anthoony` can also list files due to read permission.
+- **Others**: Cannot list files as they have no permissions.
+
+**Who can create files :**
+
+- **Owner**: Only the owner, `anthoony`, can create files in the directory because write permission is exclusively granted to the owner.
+
 > 3. What permissions allow you to create files in the `/tmp` directory?
 
+**Input and output :**
 
+```bash
+ls -ld /tmp
+drwxrwxrwt 20 root root 4096 mai    6 18:21 /tmp
+```
+
+- **`d`**: Indicates that it is a directory.
+- **`rwx` for the owner**: The owner (usually `root`) has read, write, and execute permissions.
+- **`rwx` for the group**: The group (usually `root` or a general group) has read, write, and execute permissions.
+- **`rwt` for others**: All other users also have read, write, and execute permissions. The `t` at the end is the sticky bit.
+
+**Permissions :**
+
+- **General Write Access**: The `rwx` permissions for owner, group, and others mean that any user can create, read, and execute files in `/tmp`.
+- **Sticky Bit (`t`)**: This special permission bit is crucial in a shared directory like `/tmp`. It allows all users to write files but ensures that users can only delete or rename their own files, not those of other users. This prevents unauthorized removal or alteration of files that belong to other users.
 
 #### Modifying access rights
 
@@ -88,19 +157,80 @@ Questions :
 >   rwx --- ---
 >   ```
 >
->   
->
+
+**Inputs :**
+
+_Note: inputs must be placed in the same order_
+
+File creation and initialization input :
+
+```bash
+$touch file
+```
+
+`rw- r-- ---`
+
+```bash
+$chmod g+r file
+```
+
+`rwx r-x ---`
+
+```bash
+$chmod g+x file
+```
+
+`r-- r-- r--`
+
+```bash
+$chmod a=r file
+```
+
+`rwx r-- r--`
+
+```bash
+$chmod u+wx file
+```
+
+`rwx --- ---`
+
+```bash
+$chmod go-r file
+```
+
 > 2. Conflicting permissions - Create a file (you are going to be the owner) where the permissions are configured to 
 >
 >    * not allow the owner or the group to write to the file,
->
+> 
 >    * but allow the other users to write to the file.
->
->      What does the OS do if you try to write to this file?
->
->
+> 
+>     What does the OS do if you try to write to this file?
+> 
 
+**Creating and allocating file rights :**
 
+```bash
+$touch conflict_file
+$chmod 466 conflit_file
+```
+
+We can check the rights on the file (output with the command `ls -l`) :
+
+````bash
+$ls -l
+-r--rw-rw- 1 anthony anthony 0 mai    6 22:08 conflict_file
+````
+
+We can see that the group owner has read-only rights, while two others have additional write rights.
+
+All that's left is to test :
+
+```bash
+$echo "test write" > conflict_file 
+bash: conflict_file: Permission non accordée
+```
+
+If we try to access the file, the operating system displays an error message.
 
 #### Giving other users access to your files
 
@@ -116,13 +246,19 @@ Questions :
 >
 > Note: Most Linux distributions make the users' home directories open to everyone (read access). Ubuntu adopts [a new policy in release 21.04 to make home directories private](https://ubuntu.com/blog/private-home-directories-for-ubuntu-21-04), this feature has been deactivated on our server.
 
+// todo
+
+
+
+
+
 
 
 #### Find
 
 > `find` is a powerful Unix command to search the files on a computer by name, by size, or other criteria.
 >
-> 1. Pro tip: If you run `find` without any search criteria, it will simply display everything it comes accross in its recursive traversal. So to list recursively everything in the current directory, type simply 
+> 1. Pro tip: If you run `find` without any search criteria, it will simply display everything it comes across in its recursive traversal. So to list recursively everything in the current directory, type simply 
 >
 >    ```bash
 >    find .
@@ -130,33 +266,72 @@ Questions :
 >
 >    What does find do with hidden files or directories?
 >
+
+By default, the command `find` finds and displays all files and directories, including hidden files and folders.
+
+In Unix and Linux systems, files or directories are considered hidden if their names start with a "`.`". These files are generally used to store user configuration or system information that should not be accidentally modified or deleted.
+
+When you run `find .`, the command lists all entries in the  current directory and all its subdirectories, including those whose  names start with a dot. For example, this would include files like `.bashrc`, `.git`, and directories like `.config`.
+
 > 2. Using find display all the files in your home directory
 >
->      * that end in .`c` , `.cpp` or in `.sh`
+> * that end in .`c` , `.cpp` or in `.sh`
 >
->      * that are executable
+> * that are executable
+> 
+> * that have not been modified since more than two years
 >
->      * that have not been modified since more than two years
+> * that have not been accessed since more than two years
+>  
+> * that have not been accessed since more than three years and that are bigger than 3 MB (good candidates for cleanup)
 >
->      * that have not been accessed since more than two years
->        that have not been accessed since more than three years and that are bigger than 3 MB (good candidates for cleanup)
->
->
->   Display all the directories in your home directory
->
-> * that are called `.git` (probably the root of a git repository)
->
+> 
+>  Display all the directories in your home directory
+> 
+>* that are called `.git` (probably the root of a git repository)
+> 
+
+**Files ending in `.c`, `.cpp`, or `.sh`:**
+
+```bash
+find ~ -type f \( -name "*.c" -o -name "*.cpp" -o -name "*.sh" \)
+```
+
+**Executable Files:**
+
+```bash
+find ~ -type f -executable
+```
+
+**Files not modified for more than two years:**
+
+```bash
+find ~ -type f -atime +1095 -size +3M
+```
+
+_Note : We assume that a year is always 365 days long._
+
+**Files not accessed for more than three years and larger than 3 MB:**
+
+```bash
+find ~ -type f -atime +1095 -size +3M
+```
+
 > 3. Suppose your current directory has no subdirectories. You want to display all files that contain the word `root` . Which of the two commands is correct and why:
 >
 >   ```bash
->   find . -type f -exec grep -l 'root' {} \;
+>  find . -type f -exec grep -l 'root' {} \;
 >   find * -type f -exec grep -l 'root' {} \;
 >   ```
->
+> 
 
+The first command is generally more correct and reliable:
 
+- Safety and Reliability: The first command does not rely on shell globbing (expansion of `*`), which can be problematic with a large number of files or special filenames (e.g., filenames starting with a dash).
+- Consistency: The first command consistently applies to any case, regardless of the presence or specifics of the files in the directory.
+- Direct Control: It directly searches within the specified directory (.) and is not influenced by any peculiarities of filename patterns that could interfere with command line parsing.
 
-
+Therefore, while both commands could potentially work in specific scenarios, the first command is more universally robust and should be preferred for general use to  find files containing a specified text. It avoids issues with shell  expansions and ensures that all files are correctly processed without  assuming anything about their names or count.
 
 ## Task 2: Display world-writable files
 
