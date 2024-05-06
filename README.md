@@ -14,7 +14,17 @@ Date: 2024-04-29
 > - What is the GID of your primary group ("groupe principal") and what is its name?
 > - How many other groups are you a member of?
 
+Output :
 
+```bash
+uid=1000(anthony) gid=1000(anthony) groups=1000(anthony),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),122(lpadmin),133(lxd),134(sambashare)
+```
+
+Questions :
+
+- The UID is `1000` and the account name is `anthony`.
+- The GID is `1000` the the name of the primary group is `anthony`.
+- I am a member of 8 others groups (`adm`, `cdrom`, `sudo`, `dip`, `plugdev`, `lpadmin`, `lxd`, `sambashare`).
 
 #### Interpreting access control metadata on files and directories
 
@@ -23,6 +33,33 @@ Date: 2024-04-29
 >   * `/bin/ls`
 >   * `~/.bashrc`
 >   * `~/.bash_history`
+
+* `/etc/passwd`
+
+```bash
+❯ ls -l /etc/passwd
+-rw-r--r-- 1 root root 2727 Feb 23 19:06 /etc/passwd
+```
+
+* `/bin/ls`
+
+```bash
+❯ ls -l /bin/ls
+-rwxr-xr-x 1 root root 138216 Feb  8 04:46 /bin/ls
+```
+
+```
+❯ ls -l ~/.bashrc
+-rw-r--r-- 1 anthony anthony 3792 Okt 20  2023 /home/anthony/.bashrc
+```
+
+```
+❯ ls -l ~/.bash_history
+-rw------- 1 anthony anthony 14225 Dez  8 17:28 /home/anthony/.bash_history
+```
+
+
+
 > 2. Examine the permissions of your home directory (what option do you have to pass to `ls` to examine the permissions of directories?).
 >   - Who is the owner and which is the owning group?
 >   - What is the configuration of permissions?
