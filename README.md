@@ -761,3 +761,30 @@ Permissions have been fixed.
 > - On Ubuntu Linux the personal group of the user has the same name as the user (this is a standard practice on almost all modern Linux distributions).
 > - The name of the current user is available in the environment variable $USER .
 > - You do not need to verify which groups the user is a member of. When the file has a group owner that is not the personal group of the user there is a potential security problem, and the file should be displayed.
+
+The following script has been added to fix_permissions:
+
+```bash
+
+# Task 5: Display group-writable files
+# Find all group-writable files and directories
+writable_items=$(find "$1" \( -type f -o -type d \) -perm -g+w)
+
+# Exclude files and directories assigned to the personal group of the user
+personal_group=$(id -gn)
+filtered_items=""
+while IFS= read -r item; do
+    group=$(stat -c '%G' "$item")
+    if [ "$group" != "$personal_group" ]; then
+        filtered_items+="\n$item"
+    fi
+done <<< "$writable_items"
+
+# Check if the list is empty after filtering
+if [ -z "$filtered_items" ]; then
+    echo "No group-writable files or directories found."
+else
+    echo "The following files/directories are writable for groups:"
+    echo -e "$filtered_items"
+fi
+```

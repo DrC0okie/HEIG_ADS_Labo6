@@ -53,3 +53,25 @@ else
         echo "No changes made."
     fi
 fi
+
+# Task 5: Display group-writable files
+# Find all group-writable files and directories
+writable_items=$(find "$1" \( -type f -o -type d \) -perm -g+w)
+
+# Exclude files and directories assigned to the personal group of the user
+personal_group=$(id -gn)
+filtered_items=""
+while IFS= read -r item; do
+    group=$(stat -c '%G' "$item")
+    if [ "$group" != "$personal_group" ]; then
+        filtered_items+="\n$item"
+    fi
+done <<< "$writable_items"
+
+# Check if the list is empty after filtering
+if [ -z "$filtered_items" ]; then
+    echo "No group-writable files or directories found."
+else
+    echo "The following files/directories are writable for groups:"
+    echo -e "$filtered_items"
+fi
