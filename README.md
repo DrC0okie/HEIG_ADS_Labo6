@@ -644,6 +644,8 @@ We can see that `dir1` and `file1` have their permission fixed.
 
 #### *Bonus:* option to automatically fix permissions
 
+In this "Bonus", we've added the option to specify the `-y` option in the script to pre-select the user prompt and automatically fix the permissions.
+
 ```bash
 #!/bin/bash
 

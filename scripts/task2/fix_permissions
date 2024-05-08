@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "The following files/directories are world-writable:"
+
+# Find and display world-writable files
+find ./test_dir -type f -perm -o=w -print
+
+# Find and display world-writable directories
+find ./test_dir -type d -perm -o=w -print
