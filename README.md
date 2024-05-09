@@ -17,6 +17,7 @@ Date: 2024-04-29
 Output :
 
 ```bash
+$ id
 uid=1000(anthony) gid=1000(anthony) groups=1000(anthony),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),122(lpadmin),133(lxd),134(sambashare)
 ```
 
@@ -39,7 +40,7 @@ Questions :
 `/etc/passwd` 
 
 ```bash
-ls -l /etc/passwd
+$ ls -l /etc/passwd
 -rw-r--r-- 1 root root 2727 Feb 23 19:06 /etc/passwd
 ```
 
@@ -48,21 +49,21 @@ ls -l /etc/passwd
 `/bin/ls` 
 
 ```bash
-ls -l /bin/ls
+$ ls -l /bin/ls
 -rwxr-xr-x 1 root root 138216 Feb  8 04:46 /bin/ls
 ```
 
 `~/.bashrc`
 
 ```bash
-ls -l ~/.bashrc
+$ ls -l ~/.bashrc
 -rw-r--r-- 1 anthony anthony 3792 Okt 20  2023 /home/anthony/.bashrc
 ```
 
 `~/.bash_history
 
 ```bash
-ls -l ~/.bash_history
+$ ls -l ~/.bash_history
 -rw------- 1 anthony anthony 14225 Dez  8 17:28 /home/anthony/.bash_history
 ```
 
@@ -85,7 +86,7 @@ ls -l ~/.bash_history
 **Input and output :**
 
 ```bash
-ls -ld ~
+$ ls -ld ~
 drwxr-x--- 17 anthony anthony 4096 mai    6 17:19 /home/anthony
 ```
 
@@ -124,7 +125,7 @@ drwxr-x--- 17 anthony anthony 4096 mai    6 17:19 /home/anthony
 **Input and output :**
 
 ```bash
-ls -ld /tmp
+$ ls -ld /tmp
 drwxrwxrwt 20 root root 4096 mai    6 18:21 /tmp
 ```
 
@@ -143,8 +144,8 @@ drwxrwxrwt 20 root root 4096 mai    6 18:21 /tmp
 > 1. Create a file and initialize its permissions to `rw- --- ---` with the following commands:
 >
 >   ```bash
->   touch file
->   chmod 600 file
+>   $ touch file
+>   $ chmod 600 file
 >   ```
 >
 >   Using `chmod` in symbolic mode, create the following configurations (from initial configuration "600"):
@@ -165,37 +166,37 @@ _Note: inputs must be placed in the same order_
 File creation and initialization input :
 
 ```bash
-$touch file
+$ touch file
 ```
 
 `rw- r-- ---`
 
 ```bash
-$chmod g+r file
+$ chmod g+r file
 ```
 
 `rwx r-x ---`
 
 ```bash
-$chmod g+x file
+$ chmod g+x file
 ```
 
 `r-- r-- r--`
 
 ```bash
-$chmod a=r file
+$ chmod a=r file
 ```
 
 `rwx r-- r--`
 
 ```bash
-$chmod u+wx file
+$ chmod u+wx file
 ```
 
 `rwx --- ---`
 
 ```bash
-$chmod go-r file
+$ chmod go-r file
 ```
 
 > 2. Conflicting permissions - Create a file (you are going to be the owner) where the permissions are configured to 
@@ -210,14 +211,14 @@ $chmod go-r file
 **Creating and allocating file rights :**
 
 ```bash
-$touch conflict_file
-$chmod 466 conflit_file
+$ touch conflict_file
+$ chmod 466 conflit_file
 ```
 
 We can check the rights on the file (output with the command `ls -l`) :
 
 ````bash
-$ls -l
+$ ls -l
 -r--rw-rw- 1 anthony anthony 0 mai    6 22:08 conflict_file
 ````
 
@@ -226,7 +227,7 @@ We can see that the group owner has read-only rights, while two others have addi
 All that's left is to test :
 
 ```bash
-$echo "test write" > conflict_file 
+$ echo "test write" > conflict_file 
 bash: conflict_file: Permission non accordée
 ```
 
@@ -238,21 +239,117 @@ If we try to access the file, the operating system displays an error message.
 >
 > 1. Is your colleague able to read the files in your home directory? If yes, why? If no, why not?
 >
+
+**On the shared server : `ads.iict.ch` (Ubuntu 22.04.4 LTS)**
+
+Yes, my colleague is able to read the files in my home directory. To understand why, you just need to look at the permissions of the directories in `/home`:
+
+```bash
+/home$ ls -l
+total 44
+drwxr-xr-x  5 heiguser heiguser 4096 May  6 16:07 heiguser
+drwxr-xr-x  6 lab0     lab0     4096 Mar 18 11:29 lab0
+drwxr-xr-x 12 laba     laba     4096 May  6 15:34 laba
+drwxr-xr-x  7 labb     labb     4096 Apr 14 17:17 labb
+drwxr-xr-x  6 labc     labc     4096 Apr 14 10:27 labc
+drwxr-xr-x  8 labd     labd     4096 Apr 12 11:27 labd
+drwxr-xr-x  7 labe     labe     4096 Apr 14 22:32 labe
+drwxr-xr-x  7 labf     labf     4096 Apr 29 16:57 labf
+drwxr-xr-x  6 labg     labg     4096 Apr 14 22:00 labg
+drwxr-xr-x  7 labh     labh     4096 May  7 19:22 labh
+drwxr-xr-x  7 labi     labi     4096 Apr 14 09:08 labi
+```
+
+We can see that, based on the permissions, everyone has the right to read and execute (`r-x` at the end of the string).
+
+This corresponds to the note in the instruction which says that since Ubuntu 21.04 home folders are denenus private but that this has been disabled on the server. 
+
 > 2. What do you need to do so that your colleague (and maybe others) can read your files? What do you need to do so that nobody else can read your files?
->
+
+To allow my colleague to read the files in my home directory, I don't  need to do anything. However, to ensure that only he can read the folder in my home directory, I need to proceed as follows:
+
+1. Make the home directory private:
+
+   ```bash
+   $ chmod 750 ~
+   ```
+
+2. Set a specific group for my home directory:
+
+   ```bash
+   $ chgrp proj_a ~
+   ```
+
+3. Add my colleague's username to the group defined for access:
+
+   ```bash
+   $ sudo adduser labf proj_a
+   ```
+
+   *Note: Assume that only my colleague is a member of the `proj_a` group.*
+
 > 3. In your home directory create a directory named `shared` . By using the commands `chmod` and `chgrp` configure the directory in such a way that **only** your colleague is able to read the directory and its files. You can use the groups `proj_a` and `proj_b` . Both you and your colleague are already a member of these groups. (For the sake of this exercise, suppose that nobody else is member of this group, only you and your colleague.) Give your colleague also access rights to create new files and modify existing files.
 >
 >   What commands did you use?
 >
 > Note: Most Linux distributions make the users' home directories open to everyone (read access). Ubuntu adopts [a new policy in release 21.04 to make home directories private](https://ubuntu.com/blog/private-home-directories-for-ubuntu-21-04), this feature has been deactivated on our server.
 
-// todo
+### **Translation with Instructions:**
 
+To allow my colleague to read the files in my home directory, I don't need to do anything. However, to ensure that only he can read the folder contained in my home directory, I need to proceed as follows:
 
+1. Make the home directory private:
 
+   ```bash
+   $ chmod 750 ~
+   ```
 
+2. Set a specific group for my home directory:
 
+   ```bash
+   $ chgrp proj_a ~
+   ```
 
+3. Add my colleague's username to the group defined for access:
+
+   ```bash
+   $ sudo adduser labf proj_a
+   ```
+
+   *Note: Assume that only my colleague is a member of the `proj_a` group.*
+
+4. Create a `shared` directory in your home directory:
+
+   ```bash
+   $ mkdir ~/shared
+   ```
+
+5. Set the group of the `shared` directory to `proj_a`:
+
+   ```bash
+   $ chgrp proj_a ~/shared
+   ```
+
+6. Assign appropriate permissions:
+
+   ```bash
+   $ chmod 2770 ~/shared
+   ```
+
+   - `2`: Activates the "setgid" bit so that all files created inherit the group `proj_a`.
+   - `7` (owner): `rwx` (read, write, execute)
+   - `7` (group): `rwx` (read, write, execute)
+   - `0` (others): `---` (no permissions)
+
+### **Summary of Commands:**
+```bash
+$ chmod 750 ~
+$ chgrp proj_a ~
+$ sudo adduser labf proj_a
+$ mkdir ~/shared
+$ chgrp proj_a ~/shared
+$ chmod 2770 ~/shared
+```
 
 #### Find
 
@@ -271,7 +368,7 @@ By default, the command `find` finds and displays all files and directories, inc
 
 In Unix and Linux systems, files or directories are considered hidden if their names start with a "`.`". These files are generally used to store user configuration or system information that should not be accidentally modified or deleted.
 
-When you run `find .`, the command lists all entries in the  current directory and all its subdirectories, including those whose  names start with a dot. For example, this would include files like `.bashrc`, `.git`, and directories like `.config`.
+When you run `find .`, the command lists all entries in the  current directory and all its subdirectories, including those whose  names start with a dt. For example, this would include files like `.bashrc`, `.git`, and directories like `.config`.
 
 > 2. Using find display all the files in your home directory
 >
@@ -294,19 +391,19 @@ When you run `find .`, the command lists all entries in the  current directory a
 **Files ending in `.c`, `.cpp`, or `.sh`:**
 
 ```bash
-find ~ -type f \( -name "*.c" -o -name "*.cpp" -o -name "*.sh" \)
+$ find ~ -type f \( -name "*.c" -o -name "*.cpp" -o -name "*.sh" \)
 ```
 
 **Executable Files:**
 
 ```bash
-find ~ -type f -executable
+$ find ~ -type f -executable
 ```
 
 **Files not modified for more than two years:**
 
 ```bash
-find ~ -type f -atime +1095 -size +3M
+$ find ~ -type f -atime +1095 -size +3M
 ```
 
 _Note : We assume that a year is always 365 days long._
@@ -314,14 +411,14 @@ _Note : We assume that a year is always 365 days long._
 **Files not accessed for more than three years and larger than 3 MB:**
 
 ```bash
-find ~ -type f -atime +1095 -size +3M
+$ find ~ -type f -atime +1095 -size +3M
 ```
 
 > 3. Suppose your current directory has no subdirectories. You want to display all files that contain the word `root` . Which of the two commands is correct and why:
 >
 >   ```bash
->  find . -type f -exec grep -l 'root' {} \;
->   find * -type f -exec grep -l 'root' {} \;
+> find . -type f -exec grep -l 'root' {} \;
+> find * -type f -exec grep -l 'root' {} \;
 >   ```
 > 
 
@@ -356,24 +453,22 @@ Therefore, while both commands could potentially work in specific scenarios, the
 > test_dir/dir2
 > ```
 
-##### Setting up the directories, files and permissions
+**Setting up the directories, files and permissions**
 
 ````bash
-mkdir test_dir && cd test_dir
-touch file1.txt file2.txt file3.txt
-mkdir dir1 dir2
-chmod o+w file1.txt dir1
+$ mkdir test_dir && cd test_dir
+$ touch file1.txt file2.txt file3.txt
+$ mkdir dir1 dir2
+$ chmod o+w file1.txt dir1
 
 ````
 
-
-
-##### using find to list all world writable files and directories
+**Using find to list all world writable files and directories**
 
 Files:
 
 ```bash
-find . -type f -perm -o=w -print
+$ find . -type f -perm -o=w -print
 ```
 
 output:
@@ -384,7 +479,7 @@ output:
 Directories:
 
 ```bash
-find . -type d -perm -o=w -print
+$ find . -type d -perm -o=w -print
 ```
 
 output:
@@ -392,8 +487,6 @@ output:
 ```
 ./dir1
 ```
-
-
 
 ##### Script:
 
@@ -409,8 +502,6 @@ find ./test_dir -type f -perm -o=w -print
 find ./test_dir -type d -perm -o=w -print
 ```
 
-
-
 output:
 
 ```
@@ -419,8 +510,6 @@ The following files/directories are world-writable:
 ./test_dir/dir1
 ```
 
-
-
 ## Task 3: Pass the directory as an argument
 
 > The user should be able to specify which directory the tool should analyze. Modify the script such that it takes one argument, the directory. The script should behave as follows:
@@ -428,9 +517,7 @@ The following files/directories are world-writable:
 > * If it is called without argument it should display a corresponding error message and exit with a return code 1.
 > * If the given argument is not a valid directory it should display a corresponding error message and exit with a return code 1.
 
-
-
-##### Script:
+**Script**:
 
 ```bash
 #!/bin/bash
@@ -461,9 +548,7 @@ else
 fi
 ```
 
-
-
-##### Tests
+##### **Tests**
 
 Testing with no arguments:
 
@@ -475,8 +560,6 @@ output:
 ```
 Usage: ./fix_permissions <directory>
 ```
-
-
 
 Testing with invalid directory:
 
@@ -490,8 +573,6 @@ output:
 Error: 'non_existent_directory' is not a valid directory.
 ```
 
-
-
 Testing with `test_dir`
 
 ```bash
@@ -500,15 +581,11 @@ Testing with `test_dir`
 ```
 
 output:
-```
+```bash
 The following files/directories are world-writable:
 test_dir/file1.txt
 test_dir/dir1
 ```
-
-
-
-
 
 ## Task 4: Propose a fix
 
@@ -526,9 +603,7 @@ test_dir/dir1
 >
 > Tip: To avoid having to re-create the initial state of the test directory every time you run the script do the following: Run the script on a copy of the test directory that you throw away after use.
 
-
-
-##### Script:
+**Script:**
 
 ```bash
 #!/bin/bash
@@ -577,9 +652,7 @@ else
 fi
 ```
 
-
-
-##### Tests:
+**Tests:**
 
 ```bash
 # Copy the test dir
@@ -636,11 +709,7 @@ drwxrwxr-x 2 tim tim 4096 Mai  1 10:59 dir2
 -rw-rw-r-- 1 tim tim    0 Mai  1 10:59 file3.txt
 ```
 
-
-
 We can see that `dir1` and `file1` have their permission fixed.
-
-
 
 #### *Bonus:* option to automatically fix permissions
 
@@ -718,8 +787,6 @@ test_dir/file1.txt
 test_dir/dir1
 Permissions have been fixed.
 ```
-
-
 
 ## Task 5: Display group-writable files
 
