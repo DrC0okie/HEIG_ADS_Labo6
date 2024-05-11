@@ -517,7 +517,7 @@ The following files/directories are world-writable:
 > * If it is called without argument it should display a corresponding error message and exit with a return code 1.
 > * If the given argument is not a valid directory it should display a corresponding error message and exit with a return code 1.
 
-**Script**:
+#### Script
 
 ```bash
 #!/bin/bash
@@ -548,7 +548,7 @@ else
 fi
 ```
 
-##### **Tests**
+#### Tests
 
 Testing with no arguments:
 
@@ -603,7 +603,7 @@ test_dir/dir1
 >
 > Tip: To avoid having to re-create the initial state of the test directory every time you run the script do the following: Run the script on a copy of the test directory that you throw away after use.
 
-**Script:**
+#### Script
 
 ```bash
 #!/bin/bash
@@ -652,7 +652,7 @@ else
 fi
 ```
 
-**Tests:**
+#### Tests
 
 ```bash
 # Copy the test dir
@@ -773,7 +773,7 @@ else
 fi
 ```
 
-testing the script:
+#### Test
 
 ```bash
 ./fix_permissions -y test_dir
