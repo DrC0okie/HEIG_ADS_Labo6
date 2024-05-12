@@ -30,8 +30,8 @@ header-includes:
         language=C++,
         basicstyle=\small\ttfamily,
         keywordstyle=\color{blue},
-        stringstyle=\color{red},
-        commentstyle=\color{green},
+        stringstyle=\color{brown},
+        commentstyle=\color{teal!75}\itshape,
         showstringspaces=false,
         numbers=left,
         numberstyle=\tiny,
@@ -41,6 +41,7 @@ header-includes:
         xleftmargin=20pt,
         framextopmargin=2pt,
         framexbottommargin=2pt,
+        backgroundcolor=\color{gray!8},
         }
 output:
     pdf_document:
@@ -49,7 +50,7 @@ output:
         toc: true
         toc_depth: 3
         number_sections: true
-        highlight: pygments
+
 ---
 
 \tableofcontents
@@ -949,24 +950,105 @@ The following script has been added to fix_permissions:
 
 ```bash
 # Task 5: Display group-writable files
-# Find all group-writable files and directories
-writable_items=$(find "$1" \( -type f -o -type d \) -perm -g+w)
+# Find all group-writable files/dirs, excluding those with the user's personal group
+writable_items=$(find "$1" \( -type f -o -type d \) -perm -g+w ! -group "$USER")
 
-# Exclude files and directories assigned to the personal group of the user
-personal_group=$(id -gn)
-filtered_items=""
-while IFS= read -r item; do
-    group=$(stat -c '%G' "$item")
-    if [ "$group" != "$personal_group" ]; then
-        filtered_items+="\n$item"
-    fi
-done <<< "$writable_items"
-
-# Check if the list is empty after filtering
-if [ -z "$filtered_items" ]; then
+# Check if the list is empty
+if [ -z "$writable_items" ]; then
     echo "No group-writable files or directories found."
 else
     echo "The following files/directories are writable for groups:"
-    echo -e "$filtered_items"
+    echo "$writable_items"
 fi
 ```
+
+
+
+\pagebreak
+
+
+
+#### Test
+
+test_dir listing before launching the script:
+
+```
+tim@time-machine:~/Documents/HEIG/ADS/HEIG_ADS_Labo6$ ls -lR test_dir
+test_dir:
+total 16
+drwxrwxr-x 2 tim tim    4096 Mai  1 10:22 dir1
+drwxrwxr-x 2 tim tim    4096 Mai  1 10:22 dir2
+-rw-rw-rw- 1 tim tim       0 Mai  1 10:21 file1.txt
+-rw-rw-r-- 1 tim tim       0 Mai  1 10:21 file2.txt
+-rw-rw-r-- 1 tim tim       0 Mai  1 10:21 file3.txt
+drwxrwxr-x 2 tim proj_a 4096 Mai 12 12:03 grp_a
+drwxrwxr-x 2 tim proj_b 4096 Mai 12 12:04 grp_b
+
+test_dir/dir1:
+total 0
+
+test_dir/dir2:
+total 0
+
+test_dir/grp_a:
+total 4
+-rw-rw-r-- 1 tim proj_a 2 Mai 12 11:41 file1_grp.txt
+
+test_dir/grp_b:
+total 4
+-rw-rw-r-- 1 tim proj_b 2 Mai 12 11:41 file2_grp.txt
+```
+
+Launching the script:
+
+```
+tim@time-machine:~/Documents/HEIG/ADS/HEIG_ADS_Labo6$ ./fix_permissions test_dir
+The following files/directories are world-writable:
+test_dir/file1.txt
+
+Do you want the permissions to be fixed (y/n)?
+y
+Permissions have been fixed.
+The following files/directories are writable for groups:
+test_dir/grp_a
+test_dir/grp_a/file1_grp.txt
+test_dir/grp_b
+test_dir/grp_b/file2_grp.txt
+```
+
+
+
+\pagebreak
+
+
+
+test_dir listing after launching the script:
+
+```
+tim@time-machine:~/Documents/HEIG/ADS/HEIG_ADS_Labo6$ ls -lR test_dir
+test_dir:
+total 16
+drwxrwxr-x 2 tim tim    4096 Mai  1 10:22 dir1
+drwxrwxr-x 2 tim tim    4096 Mai  1 10:22 dir2
+-rw-rw-r-- 1 tim tim       0 Mai  1 10:21 file1.txt
+-rw-rw-r-- 1 tim tim       0 Mai  1 10:21 file2.txt
+-rw-rw-r-- 1 tim tim       0 Mai  1 10:21 file3.txt
+drwxrwxr-x 2 tim proj_a 4096 Mai 12 12:03 grp_a
+drwxrwxr-x 2 tim proj_b 4096 Mai 12 12:04 grp_b
+
+test_dir/dir1:
+total 0
+
+test_dir/dir2:
+total 0
+
+test_dir/grp_a:
+total 4
+-rw-rw-r-- 1 tim proj_a 2 Mai 12 11:41 file1_grp.txt
+
+test_dir/grp_b:
+total 4
+-rw-rw-r-- 1 tim proj_b 2 Mai 12 11:41 file2_grp.txt
+
+```
+
