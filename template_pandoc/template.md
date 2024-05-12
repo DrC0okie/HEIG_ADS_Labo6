@@ -14,6 +14,9 @@ header-includes:
     - \usepackage{color}
     - \usepackage{hyperref}
     - \usepackage{xcolor}
+    - \usepackage{mdframed}
+    - \definecolor{quoteback}{rgb}{0.95,0.97,1.0}  # light grey-blue
+    - \renewenvironment{quote}{\begin{mdframed}[backgroundcolor=quoteback, leftline=true, rightline=true, topline=true, bottomline=true]}{\end{mdframed}}
     - \usepackage{fvextra}
     - \fvset{breaklines}
     - \usepackage{fancyhdr}
@@ -33,9 +36,6 @@ header-includes:
         stringstyle=\color{brown},
         commentstyle=\color{teal!75}\itshape,
         showstringspaces=false,
-        numbers=left,
-        numberstyle=\tiny,
-        numbersep=5pt,
         breaklines=true,
         breakatwhitespace=true,
         xleftmargin=20pt,
@@ -371,7 +371,7 @@ To allow my colleague to read the files in my home directory, I don't  need to d
 
 
 
-### **Translation with Instructions:**
+#### Translation with Instructions:
 
 To allow my colleague to read the files in my home directory, I don't need to do anything. However, to ensure that only he can read the folder contained in my home directory, I need to proceed as follows:
 
@@ -418,7 +418,7 @@ To allow my colleague to read the files in my home directory, I don't need to do
    - `7` (group): `rwx` (read, write, execute)
    - `0` (others): `---` (no permissions)
 
-### **Summary of Commands:**
+#### Summary of Commands:
 
 ```bash
 $ chmod 750 ~
