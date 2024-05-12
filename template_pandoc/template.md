@@ -16,7 +16,7 @@ header-includes:
     - \usepackage{xcolor}
     - \usepackage{mdframed}
     - \definecolor{quoteback}{rgb}{0.95,0.97,1.0}  # light grey-blue
-    - \renewenvironment{quote}{\begin{mdframed}[backgroundcolor=quoteback, leftline=true, rightline=true, topline=true, bottomline=true]}{\end{mdframed}}
+    - \renewenvironment{quote}{\begin{mdframed}[backgroundcolor=quoteback, leftline=false, rightline=false, topline=false, bottomline=false]}{\end{mdframed}}
     - \usepackage{fvextra}
     - \fvset{breaklines}
     - \usepackage{fancyhdr}
@@ -37,11 +37,11 @@ header-includes:
         commentstyle=\color{teal!75}\itshape,
         showstringspaces=false,
         breaklines=true,
-        breakatwhitespace=true,
+        breakatwhitespace=false,
         xleftmargin=20pt,
         framextopmargin=2pt,
         framexbottommargin=2pt,
-        backgroundcolor=\color{gray!8},
+        backgroundcolor=\color{gray!16},
         }
 output:
     pdf_document:
@@ -174,13 +174,13 @@ drwxr-x--- 17 anthony anthony 4096 mai    6 17:19 /home/anthony
 
 **Who can list files :**
 
-- **Owner**: `anthoony` has full permissions to read, which includes listing files.
-- **Group**: Members of the group `anthoony` can also list files due to read permission.
+- **Owner**: `anthony` has full permissions to read, which includes listing files.
+- **Group**: Members of the group `anthony` can also list files due to read permission.
 - **Others**: Cannot list files as they have no permissions.
 
 **Who can create files :**
 
-- **Owner**: Only the owner, `anthoony`, can create files in the directory because write permission is exclusively granted to the owner.
+- **Owner**: Only the owner, `anthony`, can create files in the directory because write permission is exclusively granted to the owner.
 
 > 3. What permissions allow you to create files in the `/tmp` directory?
 
